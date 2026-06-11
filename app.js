@@ -315,7 +315,7 @@ function renderAiPanel(cls) {
 
   const applyBtn = document.createElement("button");
   applyBtn.className = "btn btn-primary";
-  applyBtn.textContent = "Populate groups";
+  applyBtn.textContent = "Save";
   applyBtn.addEventListener("click", () => applyAiInput(cls));
   panel.appendChild(applyBtn);
 

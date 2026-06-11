@@ -69,6 +69,19 @@ function buildSubtitle() {
   return lo === hi ? `Group List(${lo})` : `Group List(${lo}-${hi})`;
 }
 
+// Normalize a raw student name: separators -> spaces, collapse whitespace,
+// and Title-Case each word (e.g. "jane doe p.q" -> "Jane Doe P Q").
+function cleanName(name) {
+  return String(name)
+    .replace(/[.,;:/\\|]+/g, " ") // separator punctuation -> space
+    .replace(/\s+/g, " ")          // collapse whitespace
+    .trim()
+    .split(" ")
+    .filter((w) => w.length > 0)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 // Split a textarea's content into a clean list of names.
 function namesOf(text) {
   return String(text)
@@ -109,7 +122,10 @@ function parseAiInput(text) {
         return;
       }
 
-      if (current !== null) groups[current].push(trimmed);
+      if (current !== null) {
+        const cleaned = cleanName(trimmed);
+        if (cleaned.length > 0) groups[current].push(cleaned);
+      }
     });
 
   // Join each group's names into the textarea string format.

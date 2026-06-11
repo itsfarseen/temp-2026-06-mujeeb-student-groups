@@ -169,6 +169,10 @@ textarea {
 }
 
 /* ---------- Class blocks ---------- */
+.classes-toolbar {
+  margin-bottom: 16px;
+}
+
 .classes {
   display: flex;
   flex-direction: column;

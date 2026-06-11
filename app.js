@@ -461,6 +461,28 @@ function addClass() {
   renderClasses();
 }
 
+/* ---------------- Sort classes ---------------- */
+
+// Split a class name into a leading number (0 if none) and the trimmed,
+// lower-cased remainder, for ordering classes like "6A" < "6B" < "12A".
+function classSortKey(name) {
+  const s = String(name).trim();
+  const m = s.match(/^(\d+)(.*)$/);
+  const num = m ? parseInt(m[1], 10) : 0;
+  const rest = (m ? m[2] : s).trim().toLowerCase();
+  return { num, rest };
+}
+
+function sortClasses() {
+  state.classes.sort((a, b) => {
+    const ka = classSortKey(a.name), kb = classSortKey(b.name);
+    if (ka.num !== kb.num) return ka.num - kb.num;
+    return ka.rest.localeCompare(kb.rest);
+  });
+  save();
+  renderClasses();
+}
+
 /* ---------------- Wire up ---------------- */
 
 function init() {
@@ -476,6 +498,7 @@ function init() {
   document.getElementById("groupPlus").addEventListener("click", () => changeGroupCount(1));
 
   document.getElementById("addClassBtn").addEventListener("click", addClass);
+  document.getElementById("sortClassesBtn").addEventListener("click", sortClasses);
   els.newClassName.addEventListener("keydown", (e) => {
     if (e.key === "Enter") addClass();
   });

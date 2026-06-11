@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Group List</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ============ EDITOR VIEW ============ -->
+  <main id="editor" class="view">
+    <header class="topbar">
+      <h1>Student Group List</h1>
+      <button id="previewBtn" class="btn btn-primary">Preview</button>
+    </header>
+
+    <section class="panel">
+      <label class="field">
+        <span class="field-label">Institution name</span>
+        <input id="institution" type="text" placeholder="e.g. Springfield High School" />
+      </label>
+
+      <div class="field">
+        <span class="field-label">Number of groups</span>
+        <div class="counter">
+          <button id="groupMinus" class="btn btn-counter" aria-label="Decrease groups">&minus;</button>
+          <span id="groupCount" class="counter-value">4</span>
+          <button id="groupPlus" class="btn btn-counter" aria-label="Increase groups">+</button>
+        </div>
+      </div>
+
+      <div class="field add-class">
+        <span class="field-label">Add a class</span>
+        <div class="add-class-row">
+          <input id="newClassName" type="text" placeholder="e.g. 6A" />
+          <button id="addClassBtn" class="btn btn-primary">Add class</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="classes" class="classes"></section>
+  </main>
+
+  <!-- ============ PREVIEW VIEW ============ -->
+  <main id="preview" class="view" style="display: none;">
+    <header class="topbar">
+      <h1>Preview</h1>
+      <div class="topbar-actions">
+        <button id="backBtn" class="btn">Back</button>
+        <button id="downloadBtn" class="btn btn-primary">Download CSV</button>
+      </div>
+    </header>
+    <div id="tableWrap" class="table-wrap"></div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

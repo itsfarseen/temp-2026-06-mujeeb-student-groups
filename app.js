@@ -221,6 +221,44 @@ function downloadCsv() {
   URL.revokeObjectURL(url);
 }
 
+async function downloadExcel() {
+  if (typeof ExcelJS === "undefined") {
+    alert("Excel export library failed to load (no network?).");
+    return;
+  }
+
+  const { rows, meta, cols } = buildGrid();
+  const workbook = new ExcelJS.Workbook();
+  const ws = workbook.addWorksheet("Group List");
+
+  rows.forEach((row, i) => {
+    const tag = meta[i];
+    const excelRow = ws.addRow(row);
+    const r = excelRow.number; // 1-based row index
+    if (tag === "title") {
+      ws.mergeCells(r, 1, r, cols); // span full width
+      const cell = ws.getCell(r, 1);
+      cell.value = row[0]; // keep title text in merged cell
+      cell.font = { bold: true };
+    } else if (tag === "header") {
+      excelRow.font = { bold: true }; // bold the whole header row
+    }
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "group-list.xlsx";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 /* ---------------- Editor rendering ---------------- */
 
 const els = {
@@ -506,6 +544,7 @@ function init() {
   document.getElementById("previewBtn").addEventListener("click", showPreview);
   document.getElementById("backBtn").addEventListener("click", showEditor);
   document.getElementById("downloadBtn").addEventListener("click", downloadCsv);
+  document.getElementById("downloadXlsBtn").addEventListener("click", downloadExcel);
 
   renderGroupCount();
   renderClasses();

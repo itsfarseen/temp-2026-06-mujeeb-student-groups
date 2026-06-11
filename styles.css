@@ -1,0 +1,265 @@
+:root {
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --border: #d4d7dd;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-text: #ffffff;
+  --danger: #dc2626;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.view {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.topbar h1 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-size: 1rem;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn:hover {
+  background: #eef0f4;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-counter {
+  width: 44px;
+  min-height: 44px;
+  font-size: 1.25rem;
+  padding: 0;
+}
+
+.btn-danger {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--panel);
+}
+
+.btn-danger:hover {
+  background: #fef2f2;
+}
+
+/* ---------- Panel / fields ---------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+input[type="text"] {
+  width: 100%;
+  font-size: 1rem;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--text);
+}
+
+textarea {
+  width: 100%;
+  font-size: 1rem;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--text);
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.counter-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  min-width: 2ch;
+  text-align: center;
+}
+
+.add-class-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.add-class-row input[type="text"] {
+  flex: 1 1 160px;
+}
+
+/* ---------- Class blocks ---------- */
+.classes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.class-block {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.class-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.class-block-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.group-field .field-label {
+  color: var(--text);
+}
+
+/* ---------- Preview table ---------- */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+table.preview-table {
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+table.preview-table td,
+table.preview-table th {
+  border: 1px solid #999;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+table.preview-table .title-cell {
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid #999;
+}
+
+table.preview-table .header-cell {
+  font-weight: bold;
+  text-align: center;
+  background: #f0f2f5;
+}
+
+table.preview-table .spacer-row td {
+  border: none;
+  height: 12px;
+}
+
+table.preview-table .col-regno {
+  min-width: 60px;
+}
+
+table.preview-table .col-name {
+  min-width: 220px;
+}
+
+table.preview-table .col-class {
+  min-width: 60px;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 600px) {
+  .topbar h1 {
+    font-size: 1.1rem;
+    width: 100%;
+  }
+}

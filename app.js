@@ -78,6 +78,50 @@ function namesOf(text) {
 }
 
 /**
+ * Parse a pasted block into per-group name lists.
+ *
+ * Walks line by line. A line like "GROUP 2" (case-insensitive) starts a new
+ * group; every following non-blank line is added to that group until the next
+ * marker. Lines before the first marker (e.g. a "*III-F*" header) and blank
+ * lines are ignored.
+ *
+ * @returns {{ groups: { [idx: number]: string }, maxGroupNum: number }}
+ *   groups keyed by 0-based group index, joined with newlines; maxGroupNum is
+ *   the highest 1-based group number seen (0 if none).
+ */
+function parseAiInput(text) {
+  const groups = {};
+  let maxGroupNum = 0;
+  let current = null; // 0-based index of the group currently being filled
+
+  String(text)
+    .split("\n")
+    .forEach((line) => {
+      const trimmed = line.trim();
+      if (trimmed.length === 0) return;
+
+      const m = trimmed.match(/^group\s*(\d+)\b/i);
+      if (m) {
+        const num = parseInt(m[1], 10);
+        current = num - 1;
+        if (num > maxGroupNum) maxGroupNum = num;
+        if (!(current in groups)) groups[current] = [];
+        return;
+      }
+
+      if (current !== null) groups[current].push(trimmed);
+    });
+
+  // Join each group's names into the textarea string format.
+  const joined = {};
+  Object.keys(groups).forEach((idx) => {
+    joined[idx] = groups[idx].join("\n");
+  });
+
+  return { groups: joined, maxGroupNum };
+}
+
+/**
  * Build the logical 2D grid shared by the HTML table and the CSV.
  * Returns { rows, meta } where rows is string[][] and meta marks special rows.
  */
@@ -184,6 +228,19 @@ function renderClassBlock(cls, index) {
   head.className = "class-block-head";
   const h2 = document.createElement("h2");
   h2.textContent = cls.name;
+
+  const headActions = document.createElement("div");
+  headActions.className = "class-block-actions";
+
+  // Toggle between the per-group editor and the AI paste panel.
+  const aiBtn = document.createElement("button");
+  aiBtn.className = "btn";
+  aiBtn.textContent = cls.aiMode ? "Edit groups" : "Use AI";
+  aiBtn.addEventListener("click", () => {
+    cls.aiMode = !cls.aiMode;
+    renderClasses();
+  });
+
   const removeBtn = document.createElement("button");
   removeBtn.className = "btn btn-danger";
   removeBtn.textContent = "Remove";
@@ -192,9 +249,16 @@ function renderClassBlock(cls, index) {
     save();
     renderClasses();
   });
+  headActions.appendChild(aiBtn);
+  headActions.appendChild(removeBtn);
   head.appendChild(h2);
-  head.appendChild(removeBtn);
+  head.appendChild(headActions);
   block.appendChild(head);
+
+  if (cls.aiMode) {
+    block.appendChild(renderAiPanel(cls));
+    return block;
+  }
 
   const grid = document.createElement("div");
   grid.className = "group-grid";
@@ -224,6 +288,64 @@ function renderClassBlock(cls, index) {
 
   block.appendChild(grid);
   return block;
+}
+
+// AI paste panel: one textarea + a button that parses it into the group boxes.
+function renderAiPanel(cls) {
+  const panel = document.createElement("div");
+  panel.className = "ai-panel";
+
+  const field = document.createElement("label");
+  field.className = "field";
+  const label = document.createElement("span");
+  label.className = "field-label";
+  label.textContent = "AI input";
+
+  const ta = document.createElement("textarea");
+  ta.className = "ai-input";
+  ta.value = cls.aiText || "";
+  ta.placeholder =
+    "Paste a block like:\n\nGROUP 1\nName One\nName Two\n\nGROUP 2\nName Three\n...";
+  ta.addEventListener("input", () => {
+    cls.aiText = ta.value;
+  });
+  field.appendChild(label);
+  field.appendChild(ta);
+  panel.appendChild(field);
+
+  const applyBtn = document.createElement("button");
+  applyBtn.className = "btn btn-primary";
+  applyBtn.textContent = "Save";
+  applyBtn.addEventListener("click", () => applyAiInput(cls));
+  panel.appendChild(applyBtn);
+
+  return panel;
+}
+
+// Parse the class's AI text and replace its group boxes with the result.
+function applyAiInput(cls) {
+  const { groups, maxGroupNum } = parseAiInput(cls.aiText || "");
+
+  // Grow the global group count if the text references higher-numbered groups.
+  if (maxGroupNum > state.groupCount) {
+    state.groupCount = maxGroupNum;
+    state.classes.forEach((c) => ensureGroups(c, state.groupCount));
+    renderGroupCount();
+  }
+
+  ensureGroups(cls, state.groupCount);
+  // Replace-all: clear every group box, then fill the ones found in the text.
+  cls.groups = cls.groups.map(() => "");
+  Object.keys(groups).forEach((idx) => {
+    const i = Number(idx);
+    while (cls.groups.length <= i) cls.groups.push("");
+    cls.groups[i] = groups[idx];
+  });
+
+  cls.aiMode = false;
+  cls.aiText = "";
+  save();
+  renderClasses();
 }
 
 function renderClasses() {

@@ -195,6 +195,29 @@ textarea {
   font-size: 1.1rem;
 }
 
+.class-block-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ---------- AI input panel ---------- */
+.ai-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ai-panel .field {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.ai-input {
+  min-height: 220px;
+}
+
 .group-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

@@ -7,13 +7,34 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- ============ APP HEADER ============ -->
+  <header id="appHeader" class="app-header">
+    <span class="app-title">Student Group List</span>
+    <button id="menuBtn" class="hamburger" aria-label="Open menu"
+            aria-expanded="false" aria-controls="menuOverlay">
+      <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+    </button>
+  </header>
+
+  <!-- ============ MENU OVERLAY ============ -->
+  <div id="menuOverlay" class="menu-overlay" hidden>
+    <div class="menu-panel" role="dialog" aria-modal="true" aria-label="Menu">
+      <div class="menu-head">
+        <span class="menu-title">Menu</span>
+        <button id="menuCloseBtn" class="menu-close" aria-label="Close menu">&times;</button>
+      </div>
+      <div class="menu-section">
+        <button id="previewBtn" class="btn btn-primary btn-block">Preview</button>
+      </div>
+      <div class="menu-section">
+        <span class="menu-section-label">Classes</span>
+        <nav id="menuToc" class="menu-toc"></nav>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ EDITOR VIEW ============ -->
   <main id="editor" class="view">
-    <header class="topbar">
-      <h1>Student Group List</h1>
-      <button id="previewBtn" class="btn btn-primary">Preview</button>
-    </header>
-
     <section class="panel">
       <label class="field">
         <span class="field-label">Institution name</span>

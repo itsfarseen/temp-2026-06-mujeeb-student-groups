@@ -90,6 +90,21 @@ function namesOf(text) {
     .filter((s) => s.length > 0);
 }
 
+// Count students in a class across the active groups (0..groupCount-1).
+// Matches buildGrid() semantics so the badge equals what preview/export contains.
+function countStudents(cls) {
+  let total = 0;
+  for (let k = 0; k < state.groupCount; k++) {
+    total += namesOf(cls.groups[k] || "").length;
+  }
+  return total;
+}
+
+// "1 student" / "N students" label for a count.
+function studentLabel(n) {
+  return n === 1 ? "1 student" : `${n} students`;
+}
+
 /**
  * Parse a pasted block into per-group name lists.
  *
@@ -269,6 +284,11 @@ const els = {
   classes: document.getElementById("classes"),
   newClassName: document.getElementById("newClassName"),
   tableWrap: document.getElementById("tableWrap"),
+  appHeader: document.getElementById("appHeader"),
+  menuBtn: document.getElementById("menuBtn"),
+  menuOverlay: document.getElementById("menuOverlay"),
+  menuCloseBtn: document.getElementById("menuCloseBtn"),
+  menuToc: document.getElementById("menuToc"),
 };
 
 // Render one class block.
@@ -277,11 +297,26 @@ function renderClassBlock(cls, index) {
 
   const block = document.createElement("div");
   block.className = "class-block";
+  block.id = `class-${index}`;
 
   const head = document.createElement("div");
   head.className = "class-block-head";
+
+  const titleWrap = document.createElement("div");
+  titleWrap.className = "class-title-wrap";
   const h2 = document.createElement("h2");
   h2.textContent = cls.name;
+
+  // Live student count badge. refreshCount() updates it in place (no re-render),
+  // so typing in a textarea keeps focus/cursor.
+  const countEl = document.createElement("span");
+  countEl.className = "class-count";
+  const refreshCount = () => {
+    countEl.textContent = studentLabel(countStudents(cls));
+  };
+  refreshCount();
+  titleWrap.appendChild(h2);
+  titleWrap.appendChild(countEl);
 
   const headActions = document.createElement("div");
   headActions.className = "class-block-actions";
@@ -305,7 +340,7 @@ function renderClassBlock(cls, index) {
   });
   headActions.appendChild(aiBtn);
   headActions.appendChild(removeBtn);
-  head.appendChild(h2);
+  head.appendChild(titleWrap);
   head.appendChild(headActions);
   block.appendChild(head);
 
@@ -332,6 +367,7 @@ function renderClassBlock(cls, index) {
     ta.placeholder = "One student name per line";
     ta.addEventListener("input", () => {
       cls.groups[k] = ta.value;
+      refreshCount();
       save();
     });
 
@@ -460,15 +496,71 @@ function renderPreview() {
   els.tableWrap.appendChild(table);
 }
 
+/* ---------------- Menu overlay + table of contents ---------------- */
+
+// Rebuild the TOC on every open so names, order, and counts always reflect
+// current state (after add/remove/sort) with no sync bookkeeping.
+function buildToc() {
+  els.menuToc.innerHTML = "";
+
+  if (state.classes.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "toc-empty";
+    empty.textContent = "No classes yet.";
+    els.menuToc.appendChild(empty);
+    return;
+  }
+
+  state.classes.forEach((cls, i) => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "toc-item";
+
+    const name = document.createElement("span");
+    name.className = "toc-name";
+    name.textContent = cls.name;
+
+    const count = document.createElement("span");
+    count.className = "toc-count";
+    count.textContent = studentLabel(countStudents(cls));
+
+    item.appendChild(name);
+    item.appendChild(count);
+    item.addEventListener("click", () => {
+      closeMenu();
+      const target = document.getElementById(`class-${i}`);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    els.menuToc.appendChild(item);
+  });
+}
+
+function openMenu() {
+  buildToc();
+  els.menuOverlay.hidden = false;
+  els.menuBtn.setAttribute("aria-expanded", "true");
+  document.body.classList.add("menu-open");
+  els.menuCloseBtn.focus();
+}
+
+function closeMenu() {
+  els.menuOverlay.hidden = true;
+  els.menuBtn.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("menu-open");
+  els.menuBtn.focus();
+}
+
 /* ---------------- View switching ---------------- */
 
 function showPreview() {
   renderPreview();
+  els.appHeader.style.display = "none";
   els.editor.style.display = "none";
   els.preview.style.display = "block";
 }
 
 function showEditor() {
+  els.appHeader.style.display = "";
   els.preview.style.display = "none";
   els.editor.style.display = "block";
 }
@@ -541,7 +633,20 @@ function init() {
     if (e.key === "Enter") addClass();
   });
 
-  document.getElementById("previewBtn").addEventListener("click", showPreview);
+  // Menu overlay
+  els.menuBtn.addEventListener("click", openMenu);
+  els.menuCloseBtn.addEventListener("click", closeMenu);
+  els.menuOverlay.addEventListener("click", (e) => {
+    if (e.target === els.menuOverlay) closeMenu();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !els.menuOverlay.hidden) closeMenu();
+  });
+
+  document.getElementById("previewBtn").addEventListener("click", () => {
+    closeMenu();
+    showPreview();
+  });
   document.getElementById("backBtn").addEventListener("click", showEditor);
   document.getElementById("downloadBtn").addEventListener("click", downloadCsv);
   document.getElementById("downloadXlsBtn").addEventListener("click", downloadExcel);
